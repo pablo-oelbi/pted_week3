@@ -79,7 +79,7 @@ posmo_filter <- posmo |>
 head(posmo_filter)
 ```
 
-## Task 1 and 2: Segmentation
+## Task 1: Segmentation
 ### a) Specify a temporal window v:
 - Sampling interval: ~10s
 - Temporal window: ~60s
@@ -120,7 +120,7 @@ ggplot(posmo_filter, aes(X,Y)) +
 
 posmo_filter <- posmo_filter|> 
   ungroup() |> 
-  mutate(static = stepMean < mean(stepMean, na.rm = TRUE))
+  mutate(static = stepMean < mean(stepMean, na.rm = TRUE)) # Task 2: Specify and apply threshold d
 
 posmo_staticfilter <- posmo_filter |> 
   filter(!static)
@@ -132,4 +132,3 @@ posmo_staticfilter |>
     coord_fixed() +
     theme(legend.position = "bottom")
 ```
-
