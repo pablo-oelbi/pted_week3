@@ -132,3 +132,15 @@ posmo_staticfilter |>
     coord_fixed() +
     theme(legend.position = "bottom")
 ```
+
+## Task 3
+
+```{r}
+posmo_filter |> 
+  ggplot(aes(X,Y)) +
+  geom_path() +
+  geom_point(aes(color = static)) +
+  coord_equal() +
+  theme(legend.position = "bottom")
+```
+
