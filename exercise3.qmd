@@ -57,3 +57,25 @@ sabi |>
   geom_point(aes(color = static)) +
   coord_fixed()
 ```
+
+## Preperation
+```{r}
+library("sf")
+posmo <- read_delim("data/posmo_data.csv")
+# Keep only the necessary columns
+posmo <- select(posmo, datetime, lon_x, lat_y)
+posmo <- posmo |> 
+  drop_na(lon_x)
+posmo <- st_as_sf(posmo, coords = c("lon_x","lat_y"), crs = 4326) |>
+  st_transform(2056)
+
+posmo_coordinates <- st_coordinates(posmo)
+
+posmo <- cbind(posmo, posmo_coordinates)
+
+posmo_filter <- posmo |>
+    filter(as.Date(datetime) == "2023-04-14")
+
+head(posmo)
+```
+
