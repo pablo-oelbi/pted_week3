@@ -74,8 +74,62 @@ posmo_coordinates <- st_coordinates(posmo)
 posmo <- cbind(posmo, posmo_coordinates)
 
 posmo_filter <- posmo |>
-    filter(as.Date(datetime) == "2023-04-14")
+    filter(as.Date(datetime) == "2023-04-17")
 
-head(posmo)
+head(posmo_filter)
+```
+
+## Task 1 and 2: Segmentation
+### a) Specify a temporal window v:
+- Sampling interval: ~10s
+- Temporal window: ~60s
+- Included fixes: 6
+1. pos[n-3] to pos[n]
+2. pos[n-2] to pos[n]
+3. pos[n-1] to pos[n]
+4. pos[n] to pos[n+1]
+5. pos[n] to pos[n+2]
+6. pos[n] to pos[n+3]
+
+
+### b) Measure the distance from every point to every other point within this temporal window
+```{r}
+posmo_filter <- posmo_filter |> 
+  mutate(
+    nMinus3 = sqrt((lag(X, 3) - X)^2 + (lag(Y, 3) - Y)^2),
+    nMinus2 = sqrt((lag(X, 2) - X)^2 + (lag(Y, 2) - Y)^2),
+    nMinus1 = sqrt((lag(X, 1) - X)^2 + (lag(Y, 1) - Y)^2),
+    nPlus1  = sqrt((X - lead(X, 1))^2 + (Y - lead(Y, 1))^2),
+    nPlus2  = sqrt((X - lead(X, 2))^2 + (Y - lead(Y, 2))^2),
+    nPlus3  = sqrt((X - lead(X, 3))^2 + (Y - lead(Y, 3))^2)
+  )
+
+posmo_filter <- posmo_filter |> 
+  rowwise() |> 
+  mutate(
+    stepMean = mean(c(nMinus2, nMinus1, nPlus1, nPlus2))
+  ) |> 
+  ungroup()
+```
+
+### c): Remove “static points”
+```{r}
+ggplot(posmo_filter, aes(X,Y)) +
+  geom_path() +
+  geom_point()
+
+posmo_filter <- posmo_filter|> 
+  ungroup() |> 
+  mutate(static = stepMean < mean(stepMean, na.rm = TRUE))
+
+posmo_staticfilter <- posmo_filter |> 
+  filter(!static)
+
+posmo_staticfilter |> 
+    ggplot(aes(X, Y)) +
+    geom_path() +
+    geom_point() +
+    coord_fixed() +
+    theme(legend.position = "bottom")
 ```
 
