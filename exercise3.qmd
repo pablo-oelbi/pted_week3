@@ -174,3 +174,17 @@ posmo_filter |>
   theme(legend.position = "bottom")
 ```
 
+## Task 5: Similarity measures
+
+```{r}
+pedestrian <- read_delim("pedestrian.csv")
+
+
+ggplot(pedestrian, aes(E,N)) +
+  geom_point(data = transform(pedestrian, TrajID = NULL), colour = "grey85") +
+  geom_path(colour = as.factor(pedestrian$TrajID)) +
+  geom_point(colour = as.factor(pedestrian$TrajID)) +
+  facet_wrap(vars(TrajID)) +
+  labs(title = "Visual comparison of the 6 trajectories", subtitle = "Each subplot highlights a trajectory")
+```
+
