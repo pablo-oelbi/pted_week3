@@ -144,3 +144,33 @@ posmo_filter |>
   theme(legend.position = "bottom")
 ```
 
+## Task 4: Segment-based analysis
+
+```{r}
+rle_id <- function(vec) {
+    x <- rle(vec)$lengths
+    as.factor(rep(seq_along(x), times = x))
+}
+
+posmo_filter <- posmo_filter |> 
+  mutate(segment_id = rle_id(static))
+
+head(posmo_filter)
+
+posmo_filter |> 
+  ggplot(aes(X,Y)) +
+  #geom_path() + #optional to connect points with a line
+  geom_point(aes(color = segment_id)) +
+  coord_equal() +
+  theme(legend.position = "bottom")
+
+posmo_filter |> 
+  group_by(segment_id) |> 
+  filter(n() > 6) |> 
+  ggplot(aes(X,Y)) +
+  #geom_path() + #optional to connect points with a line
+  geom_point(aes(color = segment_id)) +
+  coord_equal() +
+  theme(legend.position = "bottom")
+```
+
