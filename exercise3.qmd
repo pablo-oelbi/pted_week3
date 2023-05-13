@@ -188,3 +188,60 @@ ggplot(pedestrian, aes(E,N)) +
   labs(title = "Visual comparison of the 6 trajectories", subtitle = "Each subplot highlights a trajectory")
 ```
 
+## Task 6
+
+```{r}
+library("SimilarityMeasures")
+
+unique_ids <- unique(pedestrian$TrajID)
+
+for (id in unique_ids) {
+  # Subset the data frame by TrajID
+  subset_pedestrian <- subset(pedestrian, TrajID == id)
+  # Create a matrix from the Easting and Northing columns
+  assign(paste0("traj_mat", id), as.matrix(subset_pedestrian[, c("E", "N")]))
+}
+
+# Create individual matrices for each Trajectory_ID
+traj_mats <- list()
+for (id in unique_ids) {
+  # Subset the data frame by Trajectory_ID
+  subset_pedestrian <- subset(pedestrian, TrajID == id)
+  # Create a matrix from the Easting and Northing columns
+  traj_mats[[as.character(id)]] <- as.matrix(subset_pedestrian[, c("E", "N")])
+}
+
+
+# Calculate similarity measures
+sim_measures <- c("DTW", "EditDist", "Frechet", "LCSS")
+results <- list()
+for (measure in sim_measures) {
+  sim_list <- list()
+  for (i in 2:6) {
+    traj1 <- traj_mats[[1]]
+    traj2 <- traj_mats[[as.character(i)]]
+    sim <- switch(measure,
+                  "DTW" = DTW(traj1, traj2),
+                  "EditDist" = EditDist(traj1, traj2),
+                  "Frechet" = Frechet(traj1, traj2),
+                  "LCSS" = LCSS(traj1, traj2, pointSpacing = 2, pointDistance = 2,
+                                errorMarg = 0.5)
+                 )
+    sim_list[[as.character(i)]] <- sim
+  }
+  results[[measure]] <- sim_list
+}
+
+df_plot <- data.frame(Similarity_Measure = rep(sim_measures, each = 5),
+                      Trajectory_ID = rep(2:6, 4),
+                      Similarity = unlist(results))
+group_by(df_plot, Trajectory_ID)
+# Create histogram with ggplot
+ggplot(df_plot, aes(x = Trajectory_ID, y = Similarity, fill = factor(Trajectory_ID))) +
+  geom_bar(stat = "identity", position = "dodge") +
+  facet_wrap(~Similarity_Measure, scales = "free") +
+  labs(title = "Similarity Measures",
+       y = "Value",
+       x = "Comparison trajectory")
+```
+
